@@ -1,0 +1,47 @@
+Postgresql syntax for creating the tables for the database:
+
+CREATE TABLE "Items" (
+	"Id" INT GENERATED ALWAYS AS IDENTITY,
+	"Name" varchar(255) NOT NULL,
+	"Units" varchar(255) NOT NULL,
+	PRIMARY KEY("Id")
+);
+
+CREATE TABLE "PantryItems" (
+	"ItemId" INT,
+	"Quantity" INT NOT NULL,
+	PRIMARY KEY("ItemId"),
+	CONSTRAINT fk_item
+		FOREIGN KEY("ItemId")
+			REFERENCES "Items"("Id")
+);
+
+CREATE TABLE "ShoppingItems" (
+	"ItemId" INT,
+	"Quantity" INTEGER NOT NULL,
+	"IsChecked" BOOLEAN NOT NULL,
+	PRIMARY KEY("ItemId"),
+	CONSTRAINT fk_item
+		FOREIGN KEY ("ItemId")
+			REFERENCES "Items"("Id")
+);
+
+CREATE TABLE "Recipes" (
+	"RecipeId" INT GENERATED ALWAYS AS IDENTITY,
+	"Name" VARCHAR(255) NOT NULL,
+	PRIMARY KEY("RecipeId")
+);
+
+CREATE TABLE "RecipeIngredients" (
+	"RecipeId" INTEGER,
+	"ItemId" INTEGER,
+	"Quantity" INTEGER,
+	"Units" VARCHAR(255),
+	PRIMARY KEY("RecipeId", "ItemId"),
+	CONSTRAINT fk_item
+		FOREIGN KEY ("ItemId")
+			REFERENCES "Items"("Id"),
+	CONSTRAINT fk_recipe
+		FOREIGN KEY ("RecipeId")
+			REFERENCES "Recipes"("RecipeId")
+);
