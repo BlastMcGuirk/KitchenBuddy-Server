@@ -89,18 +89,23 @@ namespace KitchenBuddyServer.Controllers
         public virtual IActionResult UpdateRecipe(Recipe recipe)
         {
             // First check if there's no existing recipe with the same Id
-            if (_db.Recipes.Find(recipe.RecipeId) == null)
+            Recipe? existing = _db.Recipes.Find(recipe.RecipeId);
+            if (existing == null)
             {
                 // Return a 404
                 return NotFound();
             }
 
+            // Update the recipe
+            if (recipe.Name != null) existing.Name = recipe.Name;
+            if (recipe.Instructions != null) existing.Instructions = recipe.Instructions;
+
             // Otherwise, update the recipe and save the changes
-            _db.Recipes.Update(recipe);
+            _db.Recipes.Update(existing);
             _db.SaveChanges();
 
             // Return a 200 with the recipe (could return a 204???)
-            return Ok(recipe);
+            return Ok(existing);
         }
 
         /// <summary>
@@ -108,9 +113,17 @@ namespace KitchenBuddyServer.Controllers
         /// </summary>
         /// <param name="recipe"></param>
         /// <returns></returns>
-        [HttpDelete]
-        public virtual IActionResult DeleteRecipe(Recipe recipe)
+        [HttpDelete("{id}")]
+        public virtual IActionResult DeleteRecipe(int id)
         {
+            // First check for the recipe
+            Recipe? recipe = _db.Recipes.Find(id);
+            if (recipe == null)
+            {
+                // Return a 404
+                return NotFound();
+            }
+
             // Delete the recipe and save the changes
             _db.Recipes.Remove(recipe);
             _db.SaveChanges();

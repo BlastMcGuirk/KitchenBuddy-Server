@@ -35,10 +35,10 @@ namespace KitchenBuddyServer.Controllers
                         on i.Id equals p.ItemId
                         select new
                         {
-                            Id = i.Id,
-                            Name = i.Name,
-                            Units = i.Units,
-                            Quantity = p.Quantity
+                            i.Id,
+                            i.Name,
+                            i.Units,
+                            p.Quantity
                         }).ToList();
 
             return Ok(items);
@@ -49,7 +49,7 @@ namespace KitchenBuddyServer.Controllers
         /// </summary>
         /// <param name="id">The id of the pantry item to retrieve</param>
         /// <returns>The pantry item with that id</returns>
-        [HttpGet("{id}/Pantry")]
+        [HttpGet("Pantry/{id}")]
         public virtual IActionResult GetPantryItem(int id)
         {
             var item = (from i in _db.Items
@@ -58,10 +58,10 @@ namespace KitchenBuddyServer.Controllers
                         where i.Id == id
                         select new
                         {
-                            Id = i.Id,
-                            Name = i.Name,
-                            Units = i.Units,
-                            Quantity = p.Quantity
+                            i.Id,
+                            i.Name,
+                            i.Units,
+                            p.Quantity
                         }).FirstOrDefault();
 
             // Return 404 if the pantry item doesn't exist
@@ -82,12 +82,19 @@ namespace KitchenBuddyServer.Controllers
         [HttpPost("Pantry")]
         public virtual IActionResult AddPantryItem(PantryItem item)
         {
+            // Check if an existing pantry item exists
+            PantryItem? existing = _db.PantryItems.FirstOrDefault(pi => pi.ItemId == item.ItemId);
+            if (existing != null)
+            {
+                return BadRequest($"Pantry item for item {item.ItemId} already exists");
+            }
+
             // Add the pantry item to the database and save the changes
             _db.PantryItems.Add(item);
             _db.SaveChanges();
 
             // Return the newly created pantry item with its id
-            return CreatedAtAction("GetPantryItem", new { id = item.ItemId }, item);
+            return CreatedAtAction(nameof(GetPantryItem), new { id = item.ItemId }, item);
         }
 
         /// <summary>
@@ -99,18 +106,23 @@ namespace KitchenBuddyServer.Controllers
         public virtual IActionResult UpdatePantryItem(PantryItem item)
         {
             // First check if there's no existing pantry item with the same Id
-            if (_db.PantryItems.Find(item.ItemId) == null)
+            PantryItem? existingItem = _db.PantryItems
+                .FirstOrDefault(pantryItem => pantryItem.ItemId == item.ItemId);
+            if (existingItem == null)
             {
                 // Return a 404
                 return NotFound();
             }
 
+            // Update the item
+            existingItem.Quantity = item.Quantity;
+
             // Otherwise, update the pantry item and save the changes
-            _db.PantryItems.Update(item);
+            _db.PantryItems.Update(existingItem);
             _db.SaveChanges();
 
             // Return a 200 with the pantry item (could return a 204???)
-            return Ok(item);
+            return Ok(existingItem);
         }
 
         /// <summary>
@@ -118,11 +130,20 @@ namespace KitchenBuddyServer.Controllers
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        [HttpDelete("Pantry")]
-        public virtual IActionResult DeletePantryItem(PantryItem item)
+        [HttpDelete("Pantry/{id}")]
+        public virtual IActionResult DeletePantryItem(int id)
         {
+            // First check if there's an existing pantry item with the same Id
+            PantryItem? existingItem = _db.PantryItems
+                .FirstOrDefault(pantryItem => pantryItem.ItemId == id);
+            if (existingItem == null)
+            {
+                // Return a 404
+                return NotFound();
+            }
+
             // Delete the pantry item and save the changes
-            _db.PantryItems.Remove(item);
+            _db.PantryItems.Remove(existingItem);
             _db.SaveChanges();
 
             // Return a 204

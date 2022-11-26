@@ -11,10 +11,15 @@ namespace KitchenBuddyServer.Services
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<RecipeIngredient>().HasKey(table => new {
-                table.ItemId,
-                table.RecipeId
-            });
+            builder.Entity<Item>().ToTable("Items");
+            builder.Entity<PantryItem>().ToTable("PantryItems");
+            builder.Entity<Recipe>().ToTable("Recipes");
+            builder.Entity<RecipeIngredient>().ToTable("RecipeIngredients")
+                .HasKey(table => new {
+                    table.ItemId,
+                    table.RecipeId
+                });
+            builder.Entity<ShoppingItem>().ToTable("ShoppingItems");
         }
 
         public DbSet<Item> Items { get; set; }

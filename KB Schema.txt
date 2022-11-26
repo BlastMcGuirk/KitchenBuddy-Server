@@ -1,47 +1,103 @@
-Postgresql syntax for creating the tables for the database:
-
-CREATE TABLE "Items" (
-	"Id" INT GENERATED ALWAYS AS IDENTITY,
-	"Name" varchar(255) NOT NULL,
-	"Units" varchar(255) NOT NULL,
-	PRIMARY KEY("Id")
-);
-
-CREATE TABLE "PantryItems" (
-	"ItemId" INT,
-	"Quantity" INT NOT NULL,
-	PRIMARY KEY("ItemId"),
-	CONSTRAINT fk_item
-		FOREIGN KEY("ItemId")
-			REFERENCES "Items"("Id")
-);
-
-CREATE TABLE "ShoppingItems" (
-	"ItemId" INT,
-	"Quantity" INTEGER NOT NULL,
-	"IsChecked" BOOLEAN NOT NULL,
-	PRIMARY KEY("ItemId"),
-	CONSTRAINT fk_item
-		FOREIGN KEY ("ItemId")
-			REFERENCES "Items"("Id")
-);
-
-CREATE TABLE "Recipes" (
-	"RecipeId" INT GENERATED ALWAYS AS IDENTITY,
-	"Name" VARCHAR(255) NOT NULL,
-	PRIMARY KEY("RecipeId")
-);
-
-CREATE TABLE "RecipeIngredients" (
-	"RecipeId" INTEGER,
-	"ItemId" INTEGER,
-	"Quantity" INTEGER,
-	"Units" VARCHAR(255),
-	PRIMARY KEY("RecipeId", "ItemId"),
-	CONSTRAINT fk_item
-		FOREIGN KEY ("ItemId")
-			REFERENCES "Items"("Id"),
-	CONSTRAINT fk_recipe
-		FOREIGN KEY ("RecipeId")
-			REFERENCES "Recipes"("RecipeId")
-);
+USE [kitchenbuddy]
+GO
+/****** Object:  Table [dbo].[Items]    Script Date: 11/25/2022 8:56:35 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Items](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [nvarchar](max) NOT NULL,
+	[Units] [nvarchar](max) NOT NULL,
+ CONSTRAINT [PK_Items] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[PantryItems]    Script Date: 11/25/2022 8:56:35 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[PantryItems](
+	[PantryItemId] [int] IDENTITY(1,1) NOT NULL,
+	[ItemId] [int] NOT NULL,
+	[Quantity] [int] NOT NULL,
+ CONSTRAINT [PK_PantryItems] PRIMARY KEY CLUSTERED 
+(
+	[PantryItemId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[RecipeIngredients]    Script Date: 11/25/2022 8:56:35 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[RecipeIngredients](
+	[RecipeId] [int] NOT NULL,
+	[ItemId] [int] NOT NULL,
+	[Quantity] [int] NOT NULL,
+ CONSTRAINT [PK_RecipeIngredients] PRIMARY KEY CLUSTERED 
+(
+	[ItemId] ASC,
+	[RecipeId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Recipes]    Script Date: 11/25/2022 8:56:35 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Recipes](
+	[RecipeId] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [nvarchar](max) NOT NULL,
+	[Instructions] [nvarchar](max) NOT NULL,
+ CONSTRAINT [PK_Recipes] PRIMARY KEY CLUSTERED 
+(
+	[RecipeId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ShoppingItems]    Script Date: 11/25/2022 8:56:35 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ShoppingItems](
+	[ShoppingItemId] [int] IDENTITY(1,1) NOT NULL,
+	[ItemId] [int] NOT NULL,
+	[Quantity] [int] NOT NULL,
+	[IsChecked] [bit] NOT NULL,
+ CONSTRAINT [PK_ShoppingItems] PRIMARY KEY CLUSTERED 
+(
+	[ShoppingItemId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[PantryItems]  WITH CHECK ADD  CONSTRAINT [FK_PantryItems_Items_ItemId] FOREIGN KEY([ItemId])
+REFERENCES [dbo].[Items] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[PantryItems] CHECK CONSTRAINT [FK_PantryItems_Items_ItemId]
+GO
+ALTER TABLE [dbo].[RecipeIngredients]  WITH CHECK ADD  CONSTRAINT [FK_RecipeIngredients_Items_ItemId] FOREIGN KEY([ItemId])
+REFERENCES [dbo].[Items] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[RecipeIngredients] CHECK CONSTRAINT [FK_RecipeIngredients_Items_ItemId]
+GO
+ALTER TABLE [dbo].[RecipeIngredients]  WITH CHECK ADD  CONSTRAINT [FK_RecipeIngredients_Recipes_RecipeId] FOREIGN KEY([RecipeId])
+REFERENCES [dbo].[Recipes] ([RecipeId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[RecipeIngredients] CHECK CONSTRAINT [FK_RecipeIngredients_Recipes_RecipeId]
+GO
+ALTER TABLE [dbo].[ShoppingItems]  WITH CHECK ADD  CONSTRAINT [FK_ShoppingItems_Items_ItemId] FOREIGN KEY([ItemId])
+REFERENCES [dbo].[Items] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[ShoppingItems] CHECK CONSTRAINT [FK_ShoppingItems_Items_ItemId]
+GO

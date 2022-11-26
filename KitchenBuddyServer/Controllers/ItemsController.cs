@@ -91,18 +91,23 @@ namespace KitchenBuddyServer.Controllers
         public virtual IActionResult UpdateItem(Item item)
         {
             // First check if there's no existing item with the same Id
-            if (_db.Items.Find(item.Id) == null)
+            Item? existing = _db.Items.Find(item.Id);
+            if (existing == null)
             {
                 // Return a 404
                 return NotFound();
             }
 
+            // Update the item
+            if (item.Name != null) existing.Name = item.Name;
+            if (item.Units != null) existing.Units = item.Units;
+
             // Otherwise, update the item and save the changes
-            _db.Items.Update(item);
+            _db.Items.Update(existing);
             _db.SaveChanges();
 
             // Return a 200 with the item (could return a 204???)
-            return Ok(item);
+            return Ok(existing);
         }
 
         /// <summary>
@@ -110,9 +115,17 @@ namespace KitchenBuddyServer.Controllers
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        [HttpDelete]
-        public virtual IActionResult DeleteItem(Item item)
+        [HttpDelete("{id}")]
+        public virtual IActionResult DeleteItem(int id)
         {
+            // First check for the item
+            Item? item = _db.Items.Find(id);
+            if (item == null)
+            {
+                // Return a 404
+                return NotFound();
+            }
+
             // Delete the item and save the changes
             _db.Items.Remove(item);
             _db.SaveChanges();

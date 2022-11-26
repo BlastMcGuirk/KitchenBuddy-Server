@@ -50,13 +50,15 @@ namespace KitchenBuddyServer.Controllers
         /// Gets a recipe ingredient based on the recipe id and ingredient id
         /// </summary>
         /// <param name="recipeId"></param>
-        /// <param name="ingredientId"></param>
+        /// <param name="itemId"></param>
         /// <returns></returns>
-        [HttpGet("{recipeId}/Ingredients/{ingredientId}")]
-        public virtual IActionResult GetRecipeIngredient(int recipeId, int ingredientId)
+        [HttpGet("{recipeId}/Ingredients/{itemId}")]
+        public virtual IActionResult GetRecipeIngredient(int recipeId, int itemId)
         {
-            // If there's no ingredient with recipeId and ingredientId return 404
-            RecipeIngredient? ingredient = _db.RecipeIngredients.Find(recipeId, ingredientId);
+            // If there's no ingredient with recipeId and itemId return 404
+            RecipeIngredient? ingredient = _db.RecipeIngredients
+                .FirstOrDefault(ri => ri.RecipeId == recipeId &&
+                                        ri.ItemId == itemId);
             if (ingredient == null)
             {
                 return NotFound();
@@ -69,52 +71,71 @@ namespace KitchenBuddyServer.Controllers
         /// <summary>
         /// Create a new recipe ingredient
         /// </summary>
-        /// <param name="recipe"></param>
+        /// <param name="recipeIngredient"></param>
         /// <returns></returns>
         [HttpPost("{recipeId}/Ingredients")]
-        public virtual IActionResult AddRecipeIngredient(Recipe recipe)
+        public virtual IActionResult AddRecipeIngredient(RecipeIngredient recipeIngredient)
         {
-            // Add the recipe to the database and save the changes
-            _db.Recipes.Add(recipe);
+            // Add the recipe ingredient to the database and save the changes
+            _db.RecipeIngredients.Add(recipeIngredient);
             _db.SaveChanges();
 
-            // Return the newly created recipe with its id
-            return CreatedAtAction("GetRecipe", new { id = recipe.RecipeId }, recipe);
+            // Return the newly created recipe ingredient with its id
+            return CreatedAtAction("GetRecipeIngredient",
+                new { recipeId = recipeIngredient.RecipeId, itemId = recipeIngredient.ItemId },
+                recipeIngredient);
         }
 
         /// <summary>
         /// Update an existing recipe
         /// </summary>
-        /// <param name="recipe"></param>
+        /// <param name="recipeIngredient"></param>
         /// <returns></returns>
         [HttpPut("{recipeId}/Ingredients")]
-        public virtual IActionResult UpdateRecipe(Recipe recipe)
+        public virtual IActionResult UpdateRecipe(RecipeIngredient recipeIngredient)
         {
-            // First check if there's no existing recipe with the same Id
-            if (_db.Recipes.Find(recipe.RecipeId) == null)
+            // First check if there's an existing recipe ingredient with the same Ids
+            RecipeIngredient? existing = _db.RecipeIngredients
+                .FirstOrDefault(ri => ri.RecipeId == recipeIngredient.RecipeId &&
+                                        ri.ItemId == recipeIngredient.ItemId);
+            if (existing == null)
             {
                 // Return a 404
                 return NotFound();
             }
 
+            // Update the existing item
+            existing.Quantity = recipeIngredient.Quantity;
+
             // Otherwise, update the recipe and save the changes
-            _db.Recipes.Update(recipe);
+            _db.RecipeIngredients.Update(existing);
             _db.SaveChanges();
 
             // Return a 200 with the recipe (could return a 204???)
-            return Ok(recipe);
+            return Ok(existing);
         }
 
         /// <summary>
-        /// Delete an recipe
+        /// Delete a recipe
         /// </summary>
-        /// <param name="recipe"></param>
+        /// <param name="recipeId"></param>
+        /// <param name="itemId"></param>
         /// <returns></returns>
-        [HttpDelete("{recipeId}/Ingredients")]
-        public virtual IActionResult DeleteRecipe(RecipeIngredient recipe)
+        [HttpDelete("{recipeId}/Ingredients/{itemId}")]
+        public virtual IActionResult DeleteRecipe(int recipeId, int itemId)
         {
+            // First check if there's an existing recipe ingredient with the same Ids
+            RecipeIngredient? existing = _db.RecipeIngredients
+                .FirstOrDefault(ri => ri.RecipeId == recipeId &&
+                                        ri.ItemId == itemId);
+            if (existing == null)
+            {
+                // Return a 404
+                return NotFound();
+            }
+
             // Delete the recipe and save the changes
-            //_db.Recipes.Remove(recipe);
+            _db.RecipeIngredients.Remove(existing);
             _db.SaveChanges();
 
             // Return a 204

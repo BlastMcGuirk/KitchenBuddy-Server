@@ -1,7 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace KitchenBuddyServer.DataObjects
+﻿namespace KitchenBuddyServer.DataObjects
 {
+    /// <summary>
+    /// Represents the basic details of a recipe ingredient
+    /// </summary>
     public class RecipeIngredient
     {
         #region Public Members
@@ -20,20 +21,6 @@ namespace KitchenBuddyServer.DataObjects
         /// The quantity of the item needed
         /// </summary>
         public int Quantity { get; set; }
-
-        /// <summary>
-        /// The units of the item needed
-        /// </summary>
-        public string Units { get; set; }
-
-        #endregion
-
-        #region Constructor
-
-        public RecipeIngredient()
-        {
-            Units = "";
-        }
 
         #endregion
     }

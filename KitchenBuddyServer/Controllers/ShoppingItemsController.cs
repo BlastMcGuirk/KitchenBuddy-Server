@@ -34,7 +34,7 @@ namespace KitchenBuddyServer.Controllers
         /// </summary>
         /// <param name="id">The id of the shopping item to retrieve</param>
         /// <returns>The shopping item with that id</returns>
-        [HttpGet("{id}/Shopping")]
+        [HttpGet("Shopping/{id}")]
         public virtual IActionResult GetShoppingItem(int id)
         {
             // Look for the shopping item by Id
@@ -74,19 +74,24 @@ namespace KitchenBuddyServer.Controllers
         [HttpPut("Shopping")]
         public virtual IActionResult UpdateShoppingItem(ShoppingItem item)
         {
-            // First check if there's no existing shopping item with the same Id
-            if (_db.ShoppingItems.Find(item.ItemId) == null)
+            // First check if there's an existing shopping item with the same Id
+            ShoppingItem? existing = _db.ShoppingItems.FirstOrDefault(si => si.ItemId == item.ItemId);
+            if (existing == null)
             {
                 // Return a 404
                 return NotFound();
             }
 
+            // Update the existing shopping item
+            existing.Quantity = item.Quantity;
+            existing.IsChecked = item.IsChecked;
+
             // Otherwise, update the shopping item and save the changes
-            _db.ShoppingItems.Update(item);
+            _db.ShoppingItems.Update(existing);
             _db.SaveChanges();
 
             // Return a 200 with the shopping item (could return a 204???)
-            return Ok(item);
+            return Ok(existing);
         }
 
         /// <summary>
@@ -94,11 +99,19 @@ namespace KitchenBuddyServer.Controllers
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        [HttpDelete("Shopping")]
-        public virtual IActionResult DeleteShoppingItem(ShoppingItem item)
+        [HttpDelete("Shopping/{id}")]
+        public virtual IActionResult DeleteShoppingItem(int id)
         {
+            // First check if there's an existing shopping item with the same Id
+            ShoppingItem? existing = _db.ShoppingItems.FirstOrDefault(si => si.ItemId == id);
+            if (existing == null)
+            {
+                // Return a 404
+                return NotFound();
+            }
+
             // Delete the shopping item and save the changes
-            _db.ShoppingItems.Remove(item);
+            _db.ShoppingItems.Remove(existing);
             _db.SaveChanges();
 
             // Return a 204
