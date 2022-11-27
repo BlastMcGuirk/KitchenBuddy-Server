@@ -1,4 +1,6 @@
-﻿namespace KitchenBuddyServer.DataObjects
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace KitchenBuddyServer.DataObjects
 {
     /// <summary>
     /// Represents an item in the pantry
@@ -21,6 +23,12 @@
         /// The quantity of the item in the pantry
         /// </summary>
         public int Quantity { get; set; }
+
+        /// <summary>
+        /// The expiration date for the pantry item
+        /// </summary>
+        [Column(TypeName="Date")]
+        public DateTime? Expiration { get; set; }
 
         #endregion
     }

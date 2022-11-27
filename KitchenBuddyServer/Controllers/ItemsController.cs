@@ -99,8 +99,8 @@ namespace KitchenBuddyServer.Controllers
             }
 
             // Update the item
-            if (item.Name != null) existing.Name = item.Name;
-            if (item.Units != null) existing.Units = item.Units;
+            existing.Name = item.Name;
+            existing.Units = item.Units;
 
             // Otherwise, update the item and save the changes
             _db.Items.Update(existing);

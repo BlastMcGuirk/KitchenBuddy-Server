@@ -38,7 +38,8 @@ namespace KitchenBuddyServer.Controllers
                             i.Id,
                             i.Name,
                             i.Units,
-                            p.Quantity
+                            p.Quantity,
+                            p.Expiration
                         }).ToList();
 
             return Ok(items);
@@ -61,7 +62,8 @@ namespace KitchenBuddyServer.Controllers
                             i.Id,
                             i.Name,
                             i.Units,
-                            p.Quantity
+                            p.Quantity,
+                            p.Expiration
                         }).FirstOrDefault();
 
             // Return 404 if the pantry item doesn't exist
@@ -116,6 +118,7 @@ namespace KitchenBuddyServer.Controllers
 
             // Update the item
             existingItem.Quantity = item.Quantity;
+            existingItem.Expiration = item.Expiration;
 
             // Otherwise, update the pantry item and save the changes
             _db.PantryItems.Update(existingItem);

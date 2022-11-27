@@ -29,6 +29,7 @@ namespace KitchenBuddyServer.Controllers
         [HttpGet]
         public virtual IActionResult GetAll([FromQuery] string? q)
         {
+            // If there's no query, return all the items
             if (q == null)
             {
                 return Ok(_db.Recipes.ToList());
@@ -60,8 +61,21 @@ namespace KitchenBuddyServer.Controllers
                 return NotFound();
             }
 
+            // Get the ingredients
+            List<RecipeIngredient> ingredients = _db.RecipeIngredients.Where(ri =>
+                ri.RecipeId == id).ToList();
+
             // Return 200 with the recipe
-            return Ok(recipe);
+            return Ok(new
+            {
+                recipe.RecipeId,
+                recipe.Name,
+                recipe.Description,
+                recipe.Instructions,
+                recipe.PrepTime,
+                recipe.CookTime,
+                Ingredients = ingredients
+            });
         }
 
         /// <summary>
@@ -97,8 +111,11 @@ namespace KitchenBuddyServer.Controllers
             }
 
             // Update the recipe
-            if (recipe.Name != null) existing.Name = recipe.Name;
-            if (recipe.Instructions != null) existing.Instructions = recipe.Instructions;
+            existing.Name = recipe.Name;
+            existing.Description = recipe.Description;
+            existing.Instructions = recipe.Instructions;
+            existing.PrepTime = recipe.PrepTime;
+            existing.CookTime = recipe.CookTime;
 
             // Otherwise, update the recipe and save the changes
             _db.Recipes.Update(existing);
